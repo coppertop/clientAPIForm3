@@ -4,6 +4,8 @@ import (
     "encoding/json"
     "fmt"
     "testing"
+    "log"
+    "os"
 )
 
 
@@ -35,9 +37,10 @@ func happyCreateFetchDelete(t *testing.T) {
                         Organisation_id : "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
                         Attributes      : accountInstance,
     }
+    fmt.Println("happyCreateFetchDelete Testing Create Fetch and Delete..`")
 
     responseStr,status := CreateAccount(urlForAccAPI,localAccount)
-    fmt.Print("happyCreateFetchDelete createAccount responseStr ",responseStr)
+    //fmt.Print("happyCreateFetchDelete createAccount responseStr ",responseStr)
 
     // From the response we can extract all data, but for now we care 
     // mostly about the version since that's needed for deletion later.
@@ -47,9 +50,9 @@ func happyCreateFetchDelete(t *testing.T) {
     if err != nil {
 			t.Errorf("%v",err)
     } else {
-      fmt.Print(" unmarshalled data: ",top)
-      fmt.Println(" unmarshalled top.data created_on: ",top.Data.Created_on)
-      fmt.Println(" unmarshalled top.data id: ",top.Data.Id)
+      //fmt.Print(" unmarshalled data: ",top)
+      //fmt.Println(" unmarshalled top.data created_on: ",top.Data.Created_on)
+      //fmt.Println(" unmarshalled top.data id: ",top.Data.Id)
       fmt.Println(" unmarshalled top.data version: ",top.Data.Version)
     }
 
@@ -57,6 +60,7 @@ func happyCreateFetchDelete(t *testing.T) {
 			t.Errorf("Positive Create Failed %v",status)
 		} else {
 			t.Logf("Positive Create Success !")
+      fmt.Print("Positive Create Success !\n")
 		}
 
 /*
@@ -112,7 +116,8 @@ func happyCreateFetchDelete(t *testing.T) {
 }
 
 func sadCreate(t *testing.T) {
-// create an invalid record, verify this fails
+
+    fmt.Println("Testing create an invalid record, verify this fails..`")
     udd := User_defined_value {
                Key   : "key",
                Value : "value",
@@ -139,7 +144,8 @@ func sadCreate(t *testing.T) {
     }
 
     responseStr,status := CreateAccount(urlForAccAPI,localAccount)
-    fmt.Print("sadCreate responseStr ",responseStr)
+    _ = responseStr
+    //fmt.Println("sadCreate responseStr ",responseStr)
 		if status == "201 Created" {
 			t.Errorf("Negative Create Failed %v",status)
 		} else {
@@ -150,7 +156,7 @@ func sadCreate(t *testing.T) {
 
 
 func sadFetch(t *testing.T) {
-// fetch a record that does not exist, verify this fails
+    fmt.Println("Testing: fetch a record that does not exist (valid UUID), verify this fails ...`")
     id := "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc"
     url := urlForAccAPI + "/v1/organisation/accounts/"
     responseStr, respStatus := GetRecord(url, id)
@@ -166,6 +172,7 @@ func sadFetch(t *testing.T) {
 
 func sadFetch2(t *testing.T) {
 // fetch a record that does not exist, verify this fails
+    fmt.Println("Testing: fetch a record that does not exist (garbage-data), verify this fails ...`")
     id := "garbage-data"
     url := urlForAccAPI + "/v1/organisation/accounts/"
     responseStr, respStatus := GetRecord(url, id)
@@ -180,8 +187,8 @@ func sadFetch2(t *testing.T) {
 }
 
 func happyDelete(t *testing.T) {
-    // Create a valid record, verify it exists, then delete it
-    // verify the deletion worked.
+
+    fmt.Println("Testing: Delete valid record...`")
     udd := User_defined_value {
                Key   : "key",
                Value : "value",
@@ -219,11 +226,7 @@ func happyDelete(t *testing.T) {
     err := json.Unmarshal(jsonStr, &top)
     if err != nil {
 			t.Errorf("%v",err)
-    } else {
-      fmt.Println(" unmarshalled top.data version: ",top.Data.Version)
     }
-
-
 
     url := urlForAccAPI + "/v1/organisation/accounts/"
     respStatus := DelRecord(url, localAccount.Id, top.Data.Version)
@@ -242,6 +245,7 @@ func happyDelete(t *testing.T) {
 
 func TestEverything(t *testing.T) {
 
+  log.SetOutput(os.Stderr)
   happyCreateFetchDelete(t)
   sadCreate(t)
   sadFetch(t)
