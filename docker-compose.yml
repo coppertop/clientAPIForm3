@@ -1,8 +1,12 @@
-version: '1'
+version: '3'
 
 services:
-   clientApi:
-     command: go test
+   clientapi:
+    image: golang:1.15.6
+    volumes:
+        - .:/src
+    command: ls -la /src
+#    command: go test ../src > /src/log
 #  accountapi:
 #    image: form3tech/interview-accountapi:v1.0.0-50-ga251d4fc
 #    restart: on-failure
